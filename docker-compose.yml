@@ -1,15 +1,54 @@
 services:
-  db:
-    image: postgres
-    restart: always
-    ports:
-      - "5432:5432"
+  fastproj:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_TAG: ${APP_TAG}
+        NODE_ENV: ${NODE_ENV}
+        DB_PORT: ${DB_PORT}
+        DB_HOST: ${DB_HOST}
+    image: ${APP_NAME}:${APP_TAG}
+    container_name: ${APP_NAME}
+    restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: pass123
-  test-db:
-    image: postgres
-    restart: always
+      SERVICE_NAME: ${APP_NAME}
+      SERVICE_TAGS: dev
+      NODE_ENV: ${NODE_ENV}
+      DB_CONNECTION: pgsql
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    working_dir: /app
     ports:
-      - "5433:5432"
+      - '${APP_PORT}:3000'
+    networks:
+      - network
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:${POSTGRES_TAG}
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - '${DB_PORT}:5432'
     environment:
-      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./data/postgres/data:/var/lib/postgresql/data
+    networks:
+      - network
+    env_file:
+      - .env
+
+networks:
+  network:
+    name: network
+    driver: bridge

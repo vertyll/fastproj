@@ -1,0 +1,6 @@
+services:
+  fastproj:
+    volumes:
+      - .:/app
+      - /app/node_modules
+    tty: true
