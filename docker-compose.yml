@@ -48,6 +48,17 @@ services:
     env_file:
       - .env
 
+  test-db:
+    image: postgres:${POSTGRES_TAG}
+    container_name: test-db
+    restart: always
+    ports:
+      - '${DB_PORT}:5432'
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
 networks:
   network:
     name: network
